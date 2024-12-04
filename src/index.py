@@ -3,6 +3,8 @@ from os import getenv
 
 import requests
 
+from src.texts import WELCOME
+
 SUCCESS_RESPONSE = {
     "statusCode": 200,
 }
@@ -22,11 +24,18 @@ def send_message(reply_text, input_message):
     requests.post(url=url, json=data)
 
 
+def handle_message(message):
+    if (text := message.get("text")) and text in {"/start", "/help"}:
+        send_message(WELCOME, message)
+
+
 def handler(event, context):
     update = json.loads(event["body"])
     message = update.get("message")
 
     if not message:
         return SUCCESS_RESPONSE
+
+    handle_message(message)
 
     return SUCCESS_RESPONSE

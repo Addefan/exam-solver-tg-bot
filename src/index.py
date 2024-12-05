@@ -1,9 +1,9 @@
 import base64
 import json
-from os import getenv
 
 import requests
 
+from src.settings import TELEGRAM_API_URL, YC_API_GPT_URL, TELEGRAM_FILE_URL, FOLDER_ID, YC_API_OCR_URL
 from src.texts import WELCOME, CANT_ANSWER, CAN_HANDLE_ONLY_ONE_PHOTO
 
 SUCCESS_RESPONSE = {
@@ -16,7 +16,7 @@ def encode_to_base64(bytes_content):
 
 
 def send_message(reply_text, input_message):
-    url = f"https://api.telegram.org/bot{getenv("TG_BOT_KEY")}/sendMessage"
+    url = f"{TELEGRAM_API_URL}/sendMessage"
 
     data = {
         "chat_id": input_message["chat"]["id"],
@@ -30,7 +30,7 @@ def send_message(reply_text, input_message):
 
 
 def get_answer_from_gpt(question, iam_token):
-    url = "https://llm.api.cloud.yandex.net/foundationModels/v1/completion"
+    url = YC_API_GPT_URL
 
     headers = {
         "Accept": "application/json",
@@ -38,7 +38,7 @@ def get_answer_from_gpt(question, iam_token):
     }
 
     data = {
-        "modelUri": f"gpt://{getenv("FOLDER_ID")}/yandexgpt",
+        "modelUri": f"gpt://{FOLDER_ID}/yandexgpt",
         "messages": [
             {"role": "system", "text": "Ответь на экзаменационный билет."},
             {"role": "user", "text": question},
@@ -63,7 +63,7 @@ def get_answer_from_gpt(question, iam_token):
 
 
 def get_file_path(file_id):
-    url = f"https://api.telegram.org/bot{getenv("TG_BOT_KEY")}/getFile"
+    url = f"{TELEGRAM_API_URL}/getFile"
 
     data = {
         "file_id": file_id,
@@ -77,7 +77,7 @@ def get_file_path(file_id):
 
 
 def get_image(file_path):
-    url = f"https://api.telegram.org/file/bot{getenv("TG_BOT_KEY")}/{file_path}"
+    url = f"{TELEGRAM_FILE_URL}/{file_path}"
 
     response = requests.get(url=url)
     if response.status_code != 200:
@@ -87,7 +87,7 @@ def get_image(file_path):
 
 
 def recognize_text(base64_image, iam_token):
-    url = "https://ocr.api.cloud.yandex.net/ocr/v1/recognizeText"
+    url = YC_API_OCR_URL
 
     headers = {
         "Content-Type": "application/json",

@@ -1,13 +1,18 @@
+import base64
 import json
 from os import getenv
 
 import requests
 
-from src.texts import WELCOME, CANT_ANSWER
+from src.texts import WELCOME, CANT_ANSWER, CAN_HANDLE_ONLY_ONE_PHOTO
 
 SUCCESS_RESPONSE = {
     "statusCode": 200,
 }
+
+
+def encode_to_base64(bytes_content):
+    return base64.b64encode(bytes_content).decode("utf-8")
 
 
 def send_message(reply_text, input_message):
@@ -57,10 +62,77 @@ def get_answer_from_gpt(question, iam_token):
     return answer
 
 
+def get_file_path(file_id):
+    url = f"https://api.telegram.org/bot{getenv("TG_BOT_KEY")}/getFile"
+
+    data = {
+        "file_id": file_id,
+    }
+
+    response = requests.get(url=url, params=data)
+    if response.status_code != 200:
+        return None
+
+    return response.json()["result"].get("file_path")
+
+
+def get_image(file_path):
+    url = f"https://api.telegram.org/file/bot{getenv("TG_BOT_KEY")}/{file_path}"
+
+    response = requests.get(url=url)
+    if response.status_code != 200:
+        return None
+
+    return response.content
+
+
+def recognize_text(base64_image, iam_token):
+    url = "https://ocr.api.cloud.yandex.net/ocr/v1/recognizeText"
+
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {iam_token}",
+    }
+
+    data = {
+        "content": base64_image,
+        "mimeType": "image/jpeg",
+        "languageCodes": ["ru", "en"],
+    }
+
+    response = requests.post(url=url, headers=headers, json=data)
+    if response.status_code != 200:
+        return None
+
+    text = response.json()["result"]["textAnnotation"]["fullText"]
+    text = text.replace("-\n", "").replace("\n", " ")
+    if not text:
+        return None
+
+    return text
+
+
 def handle_message(message, iam_token):
     if (text := message.get("text")) and text in {"/start", "/help"}:
         send_message(WELCOME, message)
     elif text := message.get("text"):
+        answer = get_answer_from_gpt(text, iam_token)
+        if not answer:
+            send_message(CANT_ANSWER, message)
+            return
+
+        send_message(answer, message)
+    elif message.get("photo") and message.get("media_group_id"):
+        send_message(CAN_HANDLE_ONLY_ONE_PHOTO, message)
+    elif image := message.get("photo"):
+        image_id = image[-1]["file_id"]
+        image_path = get_file_path(image_id)
+        image = get_image(image_path)
+        text = recognize_text(image, iam_token)
+        if not text:
+            send_message(CANT_ANSWER, message)
+            return
+
         answer = get_answer_from_gpt(text, iam_token)
         if not answer:
             send_message(CANT_ANSWER, message)

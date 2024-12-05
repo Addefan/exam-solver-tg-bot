@@ -4,7 +4,7 @@ import json
 import requests
 
 from src.settings import TELEGRAM_API_URL, YC_API_GPT_URL, TELEGRAM_FILE_URL, FOLDER_ID, YC_API_OCR_URL
-from src.texts import WELCOME, CANT_ANSWER, CAN_HANDLE_ONLY_ONE_PHOTO
+from src.texts import WELCOME, CANT_ANSWER, CAN_HANDLE_ONLY_ONE_PHOTO, CAN_HANDLE_ONLY_TEXT_OR_PHOTO
 
 SUCCESS_RESPONSE = {
     "statusCode": 200,
@@ -139,6 +139,8 @@ def handle_message(message, iam_token):
             return
 
         send_message(answer, message)
+    else:
+        send_message(CAN_HANDLE_ONLY_TEXT_OR_PHOTO, message)
 
 
 def handler(event, context):

@@ -28,6 +28,10 @@ resource "yandex_function_iam_binding" "exam_solver_tg_bot_iam" {
   ]
 }
 
+resource "telegram_bot_webhook" "exam_solver_tg_bot_webhook" {
+  url = "https://functions.yandexcloud.net/${yandex_function.exam_solver_tg_bot.id}"
+}
+
 resource "yandex_storage_bucket" "exam_solver_tg_bot_bucket" {
   bucket = var.bucket_name
 }

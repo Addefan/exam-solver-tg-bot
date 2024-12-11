@@ -11,5 +11,5 @@ provider "yandex" {
   cloud_id                 = var.cloud_id
   folder_id                = var.folder_id
   zone                     = "ru-central1-a"
-  service_account_key_file = "~/.yc-keys/key.json"
+  service_account_key_file = pathexpand(var.sa_key_file_path)
 }

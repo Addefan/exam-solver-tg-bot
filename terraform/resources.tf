@@ -11,19 +11,26 @@ resource "yandex_function" "exam_solver_tg_bot" {
   service_account_id = yandex_iam_service_account.sa_exam_solver_tg_bot.id
   user_hash          = data.archive_file.content.output_sha512
   execution_timeout  = "30"
-  environment        = {
+  environment = {
     TELEGRAM_BOT_TOKEN = var.tg_bot_key
     FOLDER_ID          = var.folder_id
+    MOUNT_POINT        = var.bucket_name
+    BUCKET_OBJECT_KEY  = var.bucket_object_key
   }
   content {
     zip_filename = data.archive_file.content.output_path
+  }
+  storage_mounts {
+    mount_point_name = var.bucket_name
+    bucket           = yandex_storage_bucket.exam_solver_tg_bot_bucket.bucket
+    read_only        = true
   }
 }
 
 resource "yandex_function_iam_binding" "exam_solver_tg_bot_iam" {
   function_id = yandex_function.exam_solver_tg_bot.id
   role        = "functions.functionInvoker"
-  members     = [
+  members = [
     "system:allUsers",
   ]
 }

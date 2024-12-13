@@ -2,7 +2,7 @@ import json
 
 from services.telegram import send_message, get_file_path, get_image
 from services.yandex_cloud import recognize_text, get_answer_from_gpt
-from texts import WELCOME, CANT_ANSWER, CAN_HANDLE_ONLY_ONE_PHOTO, CAN_HANDLE_ONLY_TEXT_OR_PHOTO
+from texts import WELCOME, CANT_ANSWER, CAN_HANDLE_ONLY_TEXT_OR_PHOTO
 from utils import encode_to_base64
 
 SUCCESS_RESPONSE = {
@@ -37,9 +37,6 @@ def handle_message(message, iam_token):
 
     elif text := message.get("text"):
         handle_text_message(text, message, iam_token)
-
-    elif message.get("photo") and message.get("media_group_id"):
-        send_message(CAN_HANDLE_ONLY_ONE_PHOTO, message)
 
     elif image := message.get("photo"):
         handle_photo_message(image, message, iam_token)

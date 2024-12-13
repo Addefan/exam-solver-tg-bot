@@ -46,14 +46,7 @@ resource "yandex_storage_bucket" "exam_solver_tg_bot_bucket" {
 resource "yandex_storage_object" "yandexgpt_instruction" {
   bucket  = yandex_storage_bucket.exam_solver_tg_bot_bucket.id
   key     = var.bucket_object_key
-  content = <<EOT
-            Ты являешься преподавателем по дисциплине "Операционные системы".
-            Ты проводишь экзамен по своей дисциплине и выдаёшь билеты,
-            в каждом из которых написаны два вопроса, на которые нужно дать ответ
-            (они пронумерованы соответственно 1 и 2). Предоставь такие ответы,
-            которые ты ожидаешь получить от ученика, то есть ответы, за которые
-            ты поставишь максимально возможный балл.
-            EOT
+  source  = "instruction.txt"
 }
 
 resource "yandex_iam_service_account" "sa_exam_solver_tg_bot" {

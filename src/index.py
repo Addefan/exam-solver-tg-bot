@@ -5,10 +5,6 @@ from services.yandex_cloud import recognize_text, get_answer_from_gpt
 from texts import WELCOME, CANT_ANSWER, CAN_HANDLE_ONLY_TEXT_OR_PHOTO
 from utils import encode_to_base64
 
-SUCCESS_RESPONSE = {
-    "statusCode": 200,
-}
-
 
 def handle_text_message(text, message, iam_token):
     answer = get_answer_from_gpt(text, iam_token)
@@ -49,9 +45,9 @@ def handler(event, context):
     update = json.loads(event["body"])
     message = update.get("message")
 
-    if not message:
-        return SUCCESS_RESPONSE
+    if message:
+        handle_message(message, context.token["access_token"])
 
-    handle_message(message, context.token["access_token"])
-
-    return SUCCESS_RESPONSE
+    return {
+        "statusCode": 200,
+    }

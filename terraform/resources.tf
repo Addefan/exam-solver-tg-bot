@@ -20,10 +20,12 @@ resource "yandex_function" "exam_solver_tg_bot" {
   content {
     zip_filename = data.archive_file.content.output_path
   }
-  storage_mounts {
-    mount_point_name = var.bucket_name
-    bucket           = yandex_storage_bucket.exam_solver_tg_bot_bucket.bucket
-    read_only        = true
+  mounts {
+    name = var.bucket_name
+    mode = "ro"
+    object_storage {
+      bucket = yandex_storage_bucket.exam_solver_tg_bot_bucket.bucket
+    }
   }
 }
 
@@ -44,9 +46,9 @@ resource "yandex_storage_bucket" "exam_solver_tg_bot_bucket" {
 }
 
 resource "yandex_storage_object" "yandexgpt_instruction" {
-  bucket  = yandex_storage_bucket.exam_solver_tg_bot_bucket.id
-  key     = var.bucket_object_key
-  source  = "instruction.txt"
+  bucket = yandex_storage_bucket.exam_solver_tg_bot_bucket.id
+  key    = var.bucket_object_key
+  source = "instruction.txt"
 }
 
 resource "yandex_iam_service_account" "sa_exam_solver_tg_bot" {

@@ -1,9 +1,9 @@
 import json
 
-from src.services.telegram import send_message, get_file_path, get_image
-from src.services.yandex_cloud import recognize_text, get_answer_from_gpt
-from src.texts import WELCOME, CANT_ANSWER, CAN_HANDLE_ONLY_ONE_PHOTO, CAN_HANDLE_ONLY_TEXT_OR_PHOTO
-from src.utils import encode_to_base64
+from services.telegram import send_message, get_file_path, get_image
+from services.yandex_cloud import recognize_text, get_answer_from_gpt
+from texts import WELCOME, CANT_ANSWER, CAN_HANDLE_ONLY_ONE_PHOTO, CAN_HANDLE_ONLY_TEXT_OR_PHOTO
+from utils import encode_to_base64
 
 SUCCESS_RESPONSE = {
     "statusCode": 200,

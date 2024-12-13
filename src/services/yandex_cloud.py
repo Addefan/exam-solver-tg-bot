@@ -2,7 +2,8 @@ from pathlib import Path
 
 import requests
 
-from src.settings import YC_API_OCR_URL, FOLDER_ID, YC_API_GPT_URL, MOUNT_POINT, BUCKET_OBJECT_KEY
+from debug import logger
+from settings import YC_API_OCR_URL, FOLDER_ID, YC_API_GPT_URL, MOUNT_POINT, BUCKET_OBJECT_KEY, DEBUG
 
 
 def get_answer_from_gpt(question, iam_token):
@@ -24,6 +25,12 @@ def get_answer_from_gpt(question, iam_token):
     response = requests.post(url=url, headers=headers, json=data)
     if response.status_code != 200:
         return None
+
+    if DEBUG:
+        logger.debug(
+            message=f"Message from GPT received with status code {response.status_code}.",
+            data=response.json(),
+        )
 
     alternatives = response.json()["result"]["alternatives"]
     final_alternatives = list(filter(
@@ -56,6 +63,12 @@ def recognize_text(base64_image, iam_token):
     if response.status_code != 200:
         return None
 
+    if DEBUG:
+        logger.debug(
+            message=f"Text from image was recognized with status code {response.status_code}.",
+            data=response.json(),
+        )
+
     text = response.json()["result"]["textAnnotation"]["fullText"]
     text = text.replace("-\n", "").replace("\n", " ")
     if not text:
@@ -67,4 +80,11 @@ def recognize_text(base64_image, iam_token):
 def get_object_from_bucket(object_key):
     with open(Path("/function/storage", MOUNT_POINT, object_key), "r") as file:
         content = file.read()
+
+    if DEBUG:
+        logger.debug(
+            message=f"Instruction from Object Storage received.",
+            data={object_key: content},
+        )
+
     return content

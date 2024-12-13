@@ -1,6 +1,7 @@
 import requests
 
-from src.settings import TELEGRAM_API_URL, TELEGRAM_FILE_URL
+from debug import logger
+from settings import TELEGRAM_API_URL, TELEGRAM_FILE_URL, DEBUG
 
 
 def send_message(reply_text, input_message):
@@ -14,7 +15,12 @@ def send_message(reply_text, input_message):
         },
     }
 
-    requests.post(url=url, json=data)
+    response = requests.post(url=url, json=data)
+    if DEBUG:
+        logger.debug(
+            message=f"Message sent with status code {response.status_code}.",
+            data=response.json(),
+        )
 
 
 def get_file_path(file_id):
@@ -37,5 +43,10 @@ def get_image(file_path):
     response = requests.get(url=url)
     if response.status_code != 200:
         return None
+
+    if DEBUG:
+        logger.debug(
+            message=f"Image received with status code {response.status_code}.",
+        )
 
     return response.content

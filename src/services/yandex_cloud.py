@@ -1,6 +1,8 @@
+from pathlib import Path
+
 import requests
 
-from src.settings import YC_API_OCR_URL, FOLDER_ID, YC_API_GPT_URL
+from src.settings import YC_API_OCR_URL, FOLDER_ID, YC_API_GPT_URL, MOUNT_POINT, BUCKET_OBJECT_KEY
 
 
 def get_answer_from_gpt(question, iam_token):
@@ -14,7 +16,7 @@ def get_answer_from_gpt(question, iam_token):
     data = {
         "modelUri": f"gpt://{FOLDER_ID}/yandexgpt",
         "messages": [
-            {"role": "system", "text": "Ответь на экзаменационный билет."},
+            {"role": "system", "text": get_object_from_bucket(BUCKET_OBJECT_KEY)},
             {"role": "user", "text": question},
         ],
     }
@@ -60,3 +62,9 @@ def recognize_text(base64_image, iam_token):
         return None
 
     return text
+
+
+def get_object_from_bucket(object_key):
+    with open(Path("/function/storage", MOUNT_POINT, object_key), "r") as file:
+        content = file.read()
+    return content
